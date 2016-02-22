@@ -1,0 +1,13 @@
+# ignore node_modules
+node_modules/
+
+# ignore CLJS-generated files
+target/
+public/js/main.js
+public/js/main.min.js
+
+# ignore LESS-generated CSS files
+public/css/main.min.css
+
+# ignore diff files
+*.diff
