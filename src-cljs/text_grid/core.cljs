@@ -8,6 +8,12 @@
 ;; Constants
 ;;------------------------------------------------------------------------------
 
+(def cursor-blink-rate-ms 500)
+
+;;------------------------------------------------------------------------------
+;; Example Text
+;;------------------------------------------------------------------------------
+
 (def example-text-1
   "
   (function (root, factory) {
@@ -43,14 +49,16 @@
 
 (def example-1-vec (text->vec example-text-1))
 
-(log example-1-vec)
-
 ;;------------------------------------------------------------------------------
 ;; Page State Atom
 ;;------------------------------------------------------------------------------
 
 (def initial-grid-state
-  {:text example-1-vec})
+  {:cursors [[3 8]
+             [5 12]]
+   ;; NOTE: this property is toggled every cursor-blink-rate-ms
+   :cursor-showing? true
+   :text example-1-vec})
 
 (def grid-state (atom initial-grid-state))
 
@@ -58,13 +66,34 @@
 ; (add-watch grid-state :log atom-logger)
 
 ;;------------------------------------------------------------------------------
+;; Cursor Blink
+;;------------------------------------------------------------------------------
+
+(defn- toggle-cursor-blink! []
+  (swap! grid-state update-in [:cursor-showing?] not))
+
+(js/setInterval toggle-cursor-blink! cursor-blink-rate-ms)
+
+;;------------------------------------------------------------------------------
 ;; Components
 ;;------------------------------------------------------------------------------
 
+;; Cell options:
+;; - cursor?
+;; - highlighted?
+;; - underlined?
+;; - bold?
+;; - italic?
+;; - color
+;; - font (need to think about this one)
 (rum/defc Cell < rum/static
-  [cell]
-  [:div.cell (:ch cell)])
+  [{:keys [ch cursor?]}]
+  [:div {:class "cell"}
+    (when cursor? [:div.cursor])
+    [:div.text ch]])
 
+;; Line options:
+;; - cursor-line? (NOTE: not the same thing as "highlighted")
 (rum/defc Line < rum/static
   [line]
   [:div.line
@@ -74,10 +103,22 @@
 ;; Top Level Component
 ;;------------------------------------------------------------------------------
 
+(defn- inject-cursor-information
+  "Takes the cursor information from :cursors and injects it into the :text
+   two-dimensional vector."
+  [state]
+  (reduce (fn [state cursor]
+            (if (:cursor-showing? state)
+              (assoc-in state [:text (first cursor) (second cursor) :cursor?] true)
+              state))
+          state
+          (:cursors state)))
+
 (rum/defc Grid < rum/static
   [state]
-  [:div.grid-container
-    (map Line (:text state))])
+  (let [state2 (inject-cursor-information state)]
+    [:div.grid-container
+      (map Line (:text state2))]))
 
 ;;------------------------------------------------------------------------------
 ;; Render Loop
