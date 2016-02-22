@@ -40,6 +40,9 @@
 (defn- split-line [line-txt]
   (split line-txt ""))
 
+(defn- text->cells [s]
+  (chars->hashmaps (split s "")))
+
 (defn- text->vec [txt]
   (->> txt
        split-lines
@@ -140,3 +143,36 @@
 
 ;; trigger an initial render
 (swap! grid-state identity)
+
+;;------------------------------------------------------------------------------
+;; Public API
+;;------------------------------------------------------------------------------
+
+;; TODO: is this slow?
+(defn- js-insert-text [js-coords new-text]
+  ;; TODO: check coord bounds here
+  (let [row-idx (first js-coords)
+        col-idx (second js-coords)]
+    (swap! grid-state
+      (fn [state]
+        (let [line (get-in state [:text row-idx])
+              head (subvec line 0 col-idx)
+              tail (subvec line col-idx)
+              new-text (text->cells new-text)
+              new-line (vec (concat head new-text tail))]
+          (assoc-in state [:text row-idx] new-line))))))
+
+(defn- js-remove-text [js-coords num-chars-to-remove]
+  ;; TODO: check coord bounds here
+  (let [row-idx (first js-coords)
+        col-idx (second js-coords)]
+    (swap! grid-state
+      (fn [state]
+        (let [line (get-in state [:text row-idx])
+              head (subvec line 0 col-idx)
+              tail (subvec line (+ col-idx num-chars-to-remove))
+              new-line (vec (concat head tail))]
+          (assoc-in state [:text row-idx] new-line))))))
+
+(goog/exportSymbol "grid.insertText" js-insert-text)
+(goog/exportSymbol "grid.removeText" js-remove-text)

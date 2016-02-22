@@ -8,8 +8,17 @@
   <meta content="width=device-width, initial-scale=1" name="viewport" />
   <link href='https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
   <link href="css/main.css" rel="stylesheet" />
+  <style type="text/css">
+  .buttons-container {
+    margin-bottom: 40px;
+  }
+  </style>
 </head>
 <body>
+<div class="buttons-container">
+  <button id="btn1">insertText()</button>
+  <button id="btn2">removeText()</button>
+</div>
 <div id="gridContainer"></div>
 <script src="js/main.js"></script>
 <script>
@@ -17,6 +26,7 @@
 // low-level functions
 grid.setText
 grid.setCursor(<cursorIdx>, <rowIdx>, <colIdx>);
+grid.typeChar("a");
 
 // higher-level functions (that could be accomplished using the low-level functions)
 grid.setChar();
@@ -24,6 +34,22 @@ grid.setCursor();
 grid.addCursor();
 grid.pasteText();
 */
+
+function byId(id) {
+  return document.getElementById(id);
+}
+
+function clickBtn1() {
+  grid.insertText([3, 24], ", foo")
+}
+
+function clickBtn2() {
+  grid.removeText([2, 8], 1);
+}
+
+byId('btn1').addEventListener('click', clickBtn1);
+byId('btn2').addEventListener('click', clickBtn2);
+
 </script>
 </body>
 </html>
