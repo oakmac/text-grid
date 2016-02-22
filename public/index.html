@@ -16,8 +16,10 @@
 </head>
 <body>
 <div class="buttons-container">
+  <input type="text" id="textInput" />
   <button id="btn1">insertText()</button>
   <button id="btn2">removeText()</button>
+  <button id="btn3">moveCursor()</button>
 </div>
 <div id="gridContainer"></div>
 <script src="js/main.js"></script>
@@ -47,8 +49,53 @@ function clickBtn2() {
   grid.removeText([2, 8], 1);
 }
 
+function clickBtn3() {
+  grid.moveCursor();
+}
+
+const BACKSPACE = 8;
+const TAB = 9;
+const ENTER = 13;
+const END = 35;
+const HOME = 36;
+const LEFT = 37;
+const UP = 38;
+const RIGHT = 39;
+const DOWN = 40;
+const DELETE = 46;
+
+function onTextInputKeypress(evt) {
+  evt.preventDefault();
+
+  const keyCode = evt.keyCode;
+  const newChar = String.fromCharCode(keyCode);
+
+  if (keyCode === LEFT) {
+    grid.moveCursorsLeft();
+  }
+  else if (keyCode === RIGHT) {
+    grid.moveCursorsRight();
+  }
+  else if (keyCode === UP) {
+    grid.moveCursorsUp();
+  }
+
+  else if (keyCode === DOWN) {
+    grid.moveCursorsDown();
+  }
+  // TODO: delete character
+  // TODO: enter character
+  // TODO: home / end keys
+
+  else {
+    // TODO: insert text at the cursor
+  }
+}
+
 byId('btn1').addEventListener('click', clickBtn1);
 byId('btn2').addEventListener('click', clickBtn2);
+byId('btn3').addEventListener('click', clickBtn3);
+byId('textInput').addEventListener('keydown', onTextInputKeypress);
 
 </script>
 </body>

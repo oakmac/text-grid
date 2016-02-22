@@ -8,6 +8,10 @@ html {
 
 .grid-container .line {
   display: flex;
+
+  /* NOTE: this is dangerous; need to think about how to deal with lines
+           with no content */
+  min-height: 20px;
 }
 
 .grid-container .line.cursor-line {
