@@ -1,0 +1,12 @@
+.grid-container {
+  font-family: 'Ubuntu Mono', monospace;
+}
+
+.grid-container .line {
+  display: flex;
+}
+
+.grid-container .cell {
+  border: 1px solid #eee;
+  padding: 2px;
+}
