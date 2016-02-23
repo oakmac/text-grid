@@ -5,29 +5,23 @@
     [rum.core :as rum]))
 
 ;;------------------------------------------------------------------------------
-;; Constants
-;;------------------------------------------------------------------------------
-
-(def cursor-blink-rate-ms 500)
-
-;;------------------------------------------------------------------------------
 ;; Example Text
 ;;------------------------------------------------------------------------------
 
 (def example-text-1
   "
-  (function (root, factory) {
-    if (typeof define === 'function' && define.amd) {
-      define([], factory);
-    }
-    else if (typeof module === 'object' && module.exports) {
-      module.exports = factory();
-    }
-    else {
-      root.parinfer = factory();
-    }
-  }(this, function() { // start module anonymous scope
-  'use strict';
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  }
+  else if (typeof module === 'object' && module.exports) {
+    module.exports = factory();
+  }
+  else {
+    root.parinfer = factory();
+  }
+}(this, function() { // start module anonymous scope
+'use strict';
   ")
 
 ;;------------------------------------------------------------------------------
@@ -83,13 +77,26 @@
 ;; Cursor Blink
 ;;------------------------------------------------------------------------------
 
+(def cursor-blink-rate-ms 500)
 (def js-cursor-blink-interval nil)
 
-;; TODO: this won't work; need to always show the cursor on a movement
 (defn- toggle-cursor-blink! []
   (swap! grid-state update-in [:cursor-showing?] not))
 
+;; begin cursor blink interval
 (set! js-cursor-blink-interval (js/setInterval toggle-cursor-blink! cursor-blink-rate-ms))
+
+(defn- reset-cursor-blink
+  "Reset the cursor blink everytime the cursor moves."
+  [_kwd _the-atom old-state new-state]
+  (let [old-cursors (:cursors old-state)
+        new-cursors (:cursors new-state)]
+    (when-not (= old-cursors new-cursors)
+      (js/clearInterval js-cursor-blink-interval)
+      (swap! grid-state assoc :cursor-showing? true)
+      (set! js-cursor-blink-interval (js/setInterval toggle-cursor-blink! cursor-blink-rate-ms)))))
+
+(add-watch grid-state :cursor reset-cursor-blink)
 
 ;;------------------------------------------------------------------------------
 ;; Components
@@ -158,14 +165,6 @@
 ;; trigger an initial render
 (swap! grid-state identity)
 
-
-
-
-
-
-
-
-
 ;;------------------------------------------------------------------------------
 ;; Cursor Movements
 ;;------------------------------------------------------------------------------
@@ -207,31 +206,49 @@
       :else
       [row (inc col)])))
 
-;; TODO: this is unfinished
 (defn- move-cursor-up
   "Move a cursor up one line."
   [text [row col]]
-  (let [on-top-line? (zero? row)]
-    (if-not on-top-line?
-      [(dec row) col]
-      [row col])))
+  (let [on-top-line? (zero? row)
+        line-above (nth text (dec row) false)
+        line-above-max-col (when line-above
+                             (dec (count line-above)))
+        new-col (js/Math.min col line-above-max-col)]
+    (cond
+      on-top-line?
+      [0 0]
+
+      :else
+      [(dec row) new-col])))
 
 (defn- move-cursor-down
   "Move a cursor down one line."
   [text [row col]]
   (let [on-bottom-line? (= row (dec (count text)))
+        max-col-bottom-line (dec (count (peek text)))
         next-line-down (nth text (inc row) false)
         next-line-down-max-col (when next-line-down
                                  (dec (count next-line-down)))
         new-col (js/Math.min col next-line-down-max-col)]
     (cond
-      ;; TODO: move to the end of the line
       on-bottom-line?
-      [row col]
+      [row max-col-bottom-line]
 
       ;; else just increment the row
       :else
       [(inc row) new-col])))
+
+(defn- move-cursor-eol
+  "Move a cursor to the end of it's line."
+  [text [row col]]
+  (let [current-line (nth text row)
+        max-col (dec (count current-line))]
+    [row max-col]))
+
+(defn- move-cursor-bol
+  "Move a cursor to the beginning of it's line."
+  [text [row col]]
+  [row 0])
 
 ;;------------------------------------------------------------------------------
 ;; Public API
@@ -266,43 +283,20 @@
 (defn- js-move-cursor []
   (swap! grid-state update-in [:cursors 0 1] inc))
 
-;; NOTE: these four functions can be combined
-(defn- js-move-cursors-left []
+(defn- move-cursor [movement-fn]
   (swap! grid-state
     (fn [state]
       (let [text (:text state)
             cursors (:cursors state)
-            new-cursors (map (partial move-cursor-left text) cursors)]
-        (assoc state :cursors new-cursors)))))
-
-(defn- js-move-cursors-right []
-  (swap! grid-state
-    (fn [state]
-      (let [text (:text state)
-            cursors (:cursors state)
-            new-cursors (map (partial move-cursor-right text) cursors)]
-        (assoc state :cursors new-cursors)))))
-
-(defn- js-move-cursors-up []
-  (swap! grid-state
-    (fn [state]
-      (let [text (:text state)
-            cursors (:cursors state)
-            new-cursors (map (partial move-cursor-up text) cursors)]
-        (assoc state :cursors new-cursors)))))
-
-(defn- js-move-cursors-down []
-  (swap! grid-state
-    (fn [state]
-      (let [text (:text state)
-            cursors (:cursors state)
-            new-cursors (map (partial move-cursor-down text) cursors)]
+            new-cursors (map (partial movement-fn text) cursors)]
         (assoc state :cursors new-cursors)))))
 
 (goog/exportSymbol "grid.insertText" js-insert-text)
 (goog/exportSymbol "grid.removeText" js-remove-text)
 ; (goog/exportSymbol "grid.moveCursor" js-move-cursor)
-(goog/exportSymbol "grid.moveCursorsLeft" js-move-cursors-left)
-(goog/exportSymbol "grid.moveCursorsRight" js-move-cursors-right)
-(goog/exportSymbol "grid.moveCursorsUp" js-move-cursors-up)
-(goog/exportSymbol "grid.moveCursorsDown" js-move-cursors-down)
+(goog/exportSymbol "grid.moveCursorsLeft" (partial move-cursor move-cursor-left))
+(goog/exportSymbol "grid.moveCursorsRight" (partial move-cursor move-cursor-right))
+(goog/exportSymbol "grid.moveCursorsUp" (partial move-cursor move-cursor-up))
+(goog/exportSymbol "grid.moveCursorsDown" (partial move-cursor move-cursor-down))
+(goog/exportSymbol "grid.moveCursorsToEol" (partial move-cursor move-cursor-eol))
+(goog/exportSymbol "grid.moveCursorsToBol" (partial move-cursor move-cursor-bol))

@@ -83,10 +83,14 @@ function onTextInputKeypress(evt) {
   else if (keyCode === DOWN) {
     grid.moveCursorsDown();
   }
+  else if (keyCode === END) {
+    grid.moveCursorsToEol();
+  }
+  else if (keyCode === HOME) {
+    grid.moveCursorsToBol();
+  }
   // TODO: delete character
-  // TODO: enter character
-  // TODO: home / end keys
-
+  // TODO: enter character\
   else {
     // TODO: insert text at the cursor
   }
@@ -96,7 +100,7 @@ byId('btn1').addEventListener('click', clickBtn1);
 byId('btn2').addEventListener('click', clickBtn2);
 byId('btn3').addEventListener('click', clickBtn3);
 byId('textInput').addEventListener('keydown', onTextInputKeypress);
-
+byId('textInput').focus();
 </script>
 </body>
 </html>
