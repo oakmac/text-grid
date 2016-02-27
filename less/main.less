@@ -1,0 +1,102 @@
+@import "normalize-3.0.3.less";
+
+//------------------------------------------------------------------------------
+// Variables
+//------------------------------------------------------------------------------
+
+//@backgroundColor: #282c34;
+@backgroundColor: #fff;
+
+//------------------------------------------------------------------------------
+// Main
+//------------------------------------------------------------------------------
+
+html {
+  background: @backgroundColor;
+}
+
+
+
+//------------------------------------------------------------------------------
+// Grid
+//------------------------------------------------------------------------------
+
+.grid-container {
+  font-family: 'Ubuntu Mono', monospace;
+}
+
+.grid-container .line {
+  display: flex;
+
+  /* NOTE: this is dangerous; need to think about how to deal with lines
+           with no content */
+  min-height: 20px;
+}
+
+.grid-container .line.cursor-line {
+  background-color: rgba(153, 187, 255, 0.04);
+}
+
+.grid-container .cell {
+  box-sizing: border-box;
+  height: 20px;
+  position: relative;
+  width: 9px;
+}
+
+.grid-container .text {
+  color: #abb2bf;
+  position: absolute;
+  top: 2px;
+  left: 0;
+}
+
+.grid-container .cursor {
+  background: #528bff;
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 3px;
+  z-index: 5;
+}
+
+//------------------------------------------------------------------------------
+// Window Container
+//------------------------------------------------------------------------------
+
+.window-container {
+  display: flex;
+  flex-direction: column;
+  height: 800px;
+  justify-content: space-between;
+}
+
+//------------------------------------------------------------------------------
+// Panels
+//------------------------------------------------------------------------------
+
+.panels-container {
+  display: flex;
+  flex: 1 100%;
+  flex-direction: row;
+}
+
+.panel-container {
+
+}
+
+.panel-divider {
+  background: #aaa;
+  cursor: col-resize;
+  flex: 0 0 5px;
+}
+
+//------------------------------------------------------------------------------
+// Status Bar
+//------------------------------------------------------------------------------
+
+.status-bar-container {
+  border-top: 1px solid black;
+  flex: 0 0 40px;
+}

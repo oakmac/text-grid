@@ -156,14 +156,14 @@
   (rum/request-render
     (rum/mount (Grid new-state) container-el)))
 
-(add-watch grid-state :main on-change-grid-state)
+;; (add-watch grid-state :main on-change-grid-state)
 
 ;;------------------------------------------------------------------------------
 ;; Page Init
 ;;------------------------------------------------------------------------------
 
 ;; trigger an initial render
-(swap! grid-state identity)
+;; (swap! grid-state identity)
 
 ;;------------------------------------------------------------------------------
 ;; Cursor Movements
