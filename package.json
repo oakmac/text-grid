@@ -6,7 +6,11 @@
     "type": "git",
     "url": "https://github.com/oakmac/text-grid.git"
   },
+  "scripts": {
+    "start": "electron main.js"
+  },
   "dependencies": {
+    "electron-prebuilt": "0.36.0",
     "grunt": "0.4.5",
     "grunt-contrib-clean": "0.6.0",
     "grunt-contrib-copy": "0.8.2",

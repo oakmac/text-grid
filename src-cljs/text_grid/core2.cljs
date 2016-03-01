@@ -9,6 +9,16 @@
 ;; Constants
 ;;------------------------------------------------------------------------------
 
+(def js-ipc (aget (js/require "electron") "ipcRenderer"))
+
+
+(.on js-ipc "zoo"
+  (fn [js-evt arg]
+    (js-log "banana!")
+    (js-log js-evt)
+    (js-log arg)))
+
+
 ;; TODO: write me
 
 ;;------------------------------------------------------------------------------
@@ -63,10 +73,10 @@
     ;; TODO: add some lower / upper bounds here for the percent
     (swap! window-state assoc :divider-pct mouse-pct)))
 
+;; TODO: move this to a layer
 (defn- mouseup-body
   "Remove the panel divider add-watch! listener when the mouse is released."
   []
-  (js-log "Panel divider event removed")
   (remove-watch mouse :panel-divider))
 
 (.addEventListener js/document.body "mouseup" mouseup-body)
@@ -76,8 +86,7 @@
 ;;------------------------------------------------------------------------------
 
 (defn- on-mouse-down-panel-divider [js-evt]
-  (add-watch mouse :panel-divider on-change-mouse-pos)
-  (js-log "Panel divider event added"))
+  (add-watch mouse :panel-divider on-change-mouse-pos))
 
 (rum/defc PanelDivider < rum/static
   []
