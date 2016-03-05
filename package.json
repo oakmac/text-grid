@@ -16,6 +16,7 @@
     "grunt-contrib-copy": "0.8.2",
     "grunt-contrib-less": "0.11.4",
     "grunt-contrib-watch": "0.6.1",
-    "md5": "2.0.0"
+    "md5": "2.0.0",
+    "redis": "2.4.2"
   }
 }
